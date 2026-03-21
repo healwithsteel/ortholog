@@ -1,8 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react'
+import XRayAnnotator from './XRayAnnotator'
 
 export default function XRayUploader({ caseId, existingImages = [], onImagesChange }) {
   const [images, setImages] = useState(existingImages)
   const [showViewer, setShowViewer] = useState(null)
+  const [annotatingImage, setAnnotatingImage] = useState(null)
   const [showWarning, setShowWarning] = useState(false)
   const fileInputRef = useRef(null)
   const cameraInputRef = useRef(null)
@@ -93,6 +95,13 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
     const updated = images.map(img => img.id === id ? { ...img, caption } : img)
     setImages(updated)
     onImagesChange?.(updated)
+  }
+
+  const handleAnnotationSave = (annotatedImage) => {
+    const updated = images.map(img => img.id === annotatedImage.id ? annotatedImage : img)
+    setImages(updated)
+    onImagesChange?.(updated)
+    setAnnotatingImage(null)
   }
 
   const updateViewType = (id, viewType) => {
@@ -242,8 +251,18 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
                   placeholder="Caption..."
                   value={img.caption}
                   onChange={(e) => updateCaption(img.id, e.target.value)}
-                  style={{ width: '100%', fontSize: 12, padding: 4, borderRadius: 4, border: '1px solid var(--border)' }}
+                  style={{ width: '100%', fontSize: 12, padding: 4, borderRadius: 4, border: '1px solid var(--border)', marginBottom: 4 }}
                 />
+                <button
+                  onClick={() => setAnnotatingImage(img)}
+                  style={{
+                    width: '100%', fontSize: 11, padding: '4px 0', borderRadius: 4,
+                    border: '1px solid var(--primary)', background: 'transparent',
+                    color: 'var(--primary)', fontWeight: 600, cursor: 'pointer'
+                  }}
+                >
+                  ✏️ Annotate
+                </button>
               </div>
             </div>
           ))}
@@ -280,6 +299,16 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
           <div style={{ color: 'white', marginTop: 12, textAlign: 'center' }}>
             <p style={{ fontSize: 16, fontWeight: 600 }}>{showViewer.viewType}</p>
             {showViewer.caption && <p style={{ fontSize: 14, color: '#9ca3af', marginTop: 4 }}>{showViewer.caption}</p>}
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowViewer(null); setAnnotatingImage(showViewer); }}
+              style={{
+                marginTop: 12, background: 'rgba(255,255,255,0.15)', color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)', borderRadius: 8,
+                padding: '8px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              ✏️ Annotate This Image
+            </button>
           </div>
           <button
             onClick={() => setShowViewer(null)}
@@ -293,6 +322,15 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
             ✕
           </button>
         </div>
+      )}
+
+      {/* Annotation editor */}
+      {annotatingImage && (
+        <XRayAnnotator
+          image={annotatingImage}
+          onSave={handleAnnotationSave}
+          onCancel={() => setAnnotatingImage(null)}
+        />
       )}
     </div>
   )
