@@ -4,10 +4,10 @@ import XRayUploader from './XRayUploader'
 export default function CaseDetail({ caseData, onBack, onUpdateCase }) {
   const c = caseData
   const [xrayImages, setXrayImages] = useState(c.xrayImages || [])
+  const [shareStatus, setShareStatus] = useState(null)
 
   const handleXrayChange = (images) => {
     setXrayImages(images)
-    // Persist to case (save URLs only, not blobs)
     if (onUpdateCase) {
       onUpdateCase({
         ...c,
@@ -19,6 +19,75 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase }) {
           uploadedAt: img.uploadedAt,
         }))
       })
+    }
+  }
+
+  const generateShareText = () => {
+    const lines = [
+      `🦴 OrthoLog Case`,
+      ``,
+      `📋 ${c.procedure}`,
+      `CPT ${c.cptCode} · ${formatDate(c.date)}`,
+      ``,
+      `👨‍⚕️ Attending: ${c.attending}`,
+      `🔧 Approach: ${c.approach}`,
+      `📂 Category: ${Array.isArray(c.category) ? c.category.join(', ') : c.category}`,
+      `🦴 Region: ${c.bodyRegion}`,
+      `🎯 Role: ${c.role}`,
+    ]
+
+    if (c.position) lines.push(`🛏️ Position: ${c.position}`)
+    if (c.implants?.length) lines.push(`🔩 Implants: ${c.implants.join(', ')}`)
+    if (c.reductionAids?.length) lines.push(`🛠️ Reduction Aids: ${c.reductionAids.join(', ')}`)
+    
+    if (c.notes) {
+      lines.push(``, `📝 Notes:`, c.notes)
+    }
+    if (c.tips) {
+      lines.push(``, `💡 Tip:`, c.tips)
+    }
+
+    lines.push(``, `---`, `Shared via OrthoLog`)
+
+    return lines.join('\n')
+  }
+
+  const handleShare = async () => {
+    const text = generateShareText()
+
+    // Try Web Share API first (works on mobile Safari, Chrome, etc.)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `OrthoLog: ${c.procedure}`,
+          text: text,
+        })
+        setShareStatus('shared')
+        setTimeout(() => setShareStatus(null), 2000)
+        return
+      } catch (err) {
+        // User cancelled or share failed — fall through to clipboard
+        if (err.name === 'AbortError') return
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(text)
+      setShareStatus('copied')
+      setTimeout(() => setShareStatus(null), 2000)
+    } catch (err) {
+      // Last resort: textarea fallback for older browsers
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      setShareStatus('copied')
+      setTimeout(() => setShareStatus(null), 2000)
     }
   }
   
@@ -106,8 +175,8 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-        <button className="btn btn-outline btn-sm" style={{ flex: 1 }}>
-          📤 Share Case
+        <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={handleShare}>
+          {shareStatus === 'copied' ? '✅ Copied!' : shareStatus === 'shared' ? '✅ Shared!' : '📤 Share Case'}
         </button>
         <button className="btn btn-outline btn-sm" style={{ flex: 1 }}>
           ✏️ Edit
