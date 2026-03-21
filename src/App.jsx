@@ -87,6 +87,10 @@ export default function App() {
     setShowNewTip(false)
   }
 
+  const handleUpdateTip = (updatedTip) => {
+    setTips(prev => prev.map(t => t.id === updatedTip.id ? updatedTip : t))
+  }
+
   const handleExport = () => {
     const data = exportAllData()
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -128,7 +132,7 @@ export default function App() {
       case 'cases':
         return <CaseList cases={cases} onSelectCase={setSelectedCase} />
       case 'tips':
-        return <TipsPage tips={tips} onNewTip={() => setShowNewTip(true)} />
+        return <TipsPage tips={tips} onNewTip={() => setShowNewTip(true)} onUpdateTip={handleUpdateTip} />
       case 'cpt':
         return <CPTLibrary />
       case 'profile':
