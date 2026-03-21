@@ -1,7 +1,26 @@
-import React from 'react'
+import React, { useState } from 'react'
+import XRayUploader from './XRayUploader'
 
-export default function CaseDetail({ caseData, onBack }) {
+export default function CaseDetail({ caseData, onBack, onUpdateCase }) {
   const c = caseData
+  const [xrayImages, setXrayImages] = useState(c.xrayImages || [])
+
+  const handleXrayChange = (images) => {
+    setXrayImages(images)
+    // Persist to case (save URLs only, not blobs)
+    if (onUpdateCase) {
+      onUpdateCase({
+        ...c,
+        xrayImages: images.map(img => ({
+          id: img.id,
+          url: img.url,
+          viewType: img.viewType,
+          caption: img.caption,
+          uploadedAt: img.uploadedAt,
+        }))
+      })
+    }
+  }
   
   return (
     <div>
@@ -77,16 +96,14 @@ export default function CaseDetail({ caseData, onBack }) {
         </div>
       )}
 
-      {c.xrayUrls && c.xrayUrls.length > 0 && (
-        <div className="card">
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>🩻 X-Rays</h3>
-          <div className="image-grid">
-            {c.xrayUrls.map((url, i) => (
-              <img key={i} src={url} alt={`Case X-ray ${i + 1}`} />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* X-Ray Section */}
+      <div className="card">
+        <XRayUploader
+          caseId={c.id}
+          existingImages={xrayImages}
+          onImagesChange={handleXrayChange}
+        />
+      </div>
 
       <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
         <button className="btn btn-outline btn-sm" style={{ flex: 1 }}>

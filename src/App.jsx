@@ -113,9 +113,13 @@ export default function App() {
     return <OnboardingScreen onComplete={handleOnboardingComplete} />
   }
 
+  const handleUpdateCase = (updatedCase) => {
+    setCases(prev => prev.map(c => c.id === updatedCase.id ? updatedCase : c))
+  }
+
   const renderPage = () => {
     if (selectedCase) {
-      return <CaseDetail caseData={selectedCase} onBack={() => setSelectedCase(null)} />
+      return <CaseDetail caseData={selectedCase} onBack={() => setSelectedCase(null)} onUpdateCase={handleUpdateCase} />
     }
     
     switch (activeTab) {
