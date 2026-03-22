@@ -248,9 +248,14 @@ export default function App() {
     setCases(prev => prev.map(c => c.id === updatedCase.id ? updatedCase : c))
   }
 
+  const handleDeleteCase = (caseId) => {
+    setCases(prev => prev.filter(c => c.id !== caseId))
+    setSelectedCase(null)
+  }
+
   const renderPage = () => {
     if (selectedCase) {
-      return <CaseDetail caseData={selectedCase} onBack={() => setSelectedCase(null)} onUpdateCase={handleUpdateCase} />
+      return <CaseDetail caseData={selectedCase} onBack={() => setSelectedCase(null)} onUpdateCase={handleUpdateCase} onDeleteCase={handleDeleteCase} />
     }
     
     switch (activeTab) {

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import XRayUploader from './XRayUploader'
 import { CPT_CODES, REDUCTION_AIDS, IMPLANT_TYPES, APPROACHES, DEFAULT_ATTENDINGS } from '../data/cptCodes'
 
-export default function CaseDetail({ caseData, onBack, onUpdateCase }) {
+export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCase }) {
   const [c, setC] = useState(caseData)
   const [xrayImages, setXrayImages] = useState(c.xrayImages || [])
   const [shareStatus, setShareStatus] = useState(null)
@@ -11,6 +11,7 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase }) {
   const [cptSearch, setCptSearch] = useState('')
   const [showCptPicker, setShowCptPicker] = useState(false)
   const [saveStatus, setSaveStatus] = useState(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleXrayChange = (images) => {
     setXrayImages(images)
@@ -336,6 +337,56 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase }) {
           ✏️ Edit
         </button>
       </div>
+
+      {!showDeleteConfirm ? (
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          style={{
+            width: '100%', marginTop: 12, padding: '10px 16px',
+            background: 'none', border: '1px solid #ef4444', borderRadius: 8,
+            color: '#ef4444', fontSize: 14, fontWeight: 600, cursor: 'pointer'
+          }}
+        >
+          🗑️ Delete Case
+        </button>
+      ) : (
+        <div style={{
+          marginTop: 12, padding: 16, background: '#fef2f2', border: '1px solid #fecaca',
+          borderRadius: 12, textAlign: 'center'
+        }}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: '#991b1b', marginBottom: 4 }}>
+            Delete this case?
+          </p>
+          <p style={{ fontSize: 13, color: '#b91c1c', marginBottom: 12 }}>
+            "{c.procedure}" — {formatDate(c.date)}
+          </p>
+          <p style={{ fontSize: 12, color: '#dc2626', marginBottom: 16 }}>
+            This cannot be undone.
+          </p>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              style={{
+                flex: 1, padding: '10px 16px', background: 'white',
+                border: '1px solid var(--border)', borderRadius: 8,
+                fontSize: 14, fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => onDeleteCase && onDeleteCase(c.id)}
+              style={{
+                flex: 1, padding: '10px 16px', background: '#dc2626',
+                border: 'none', borderRadius: 8, color: 'white',
+                fontSize: 14, fontWeight: 700, cursor: 'pointer'
+              }}
+            >
+              Yes, Delete
+            </button>
+          </div>
+        </div>
+      )}
 
       <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
         Logged by {c.createdBy} · {new Date(c.createdAt).toLocaleDateString()}
