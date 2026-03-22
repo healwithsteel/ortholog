@@ -19,26 +19,47 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
 
   const startEdit = (tip) => {
     setEditing(tip.id)
+    const tagArr = Array.isArray(tip.tags) ? tip.tags : []
     setEditForm({
-      title: tip.title,
-      body: tip.body,
+      title: tip.title || '',
+      body: tip.body || '',
       category: tip.category || 'trauma',
       procedure: tip.procedure || '',
-      tags: (tip.tags || []).join(', '),
+      tags: tagArr.join(', '),
     })
   }
 
   const saveEdit = (tipId) => {
-    const tip = tips.find(t => t.id === tipId)
-    if (tip && onUpdateTip) {
-      onUpdateTip({
-        ...tip,
-        ...editForm,
-        tags: editForm.tags.split(',').map(t => t.trim()).filter(Boolean),
-      })
+    try {
+      const tip = tips.find(t => t.id === tipId)
+      if (tip && onUpdateTip) {
+        const tagsStr = editForm.tags || ''
+        const parsedTags = typeof tagsStr === 'string' 
+          ? tagsStr.split(',').map(t => t.trim()).filter(Boolean)
+          : Array.isArray(tagsStr) ? tagsStr : []
+        
+        const updated = {
+          ...tip,
+          title: editForm.title || tip.title,
+          body: editForm.body || tip.body,
+          category: editForm.category || tip.category,
+          procedure: editForm.procedure || tip.procedure,
+          tags: parsedTags,
+        }
+        // Exit edit mode FIRST to prevent re-render conflict
+        setEditing(null)
+        setEditForm({})
+        // Then update the tip
+        onUpdateTip(updated)
+      } else {
+        setEditing(null)
+        setEditForm({})
+      }
+    } catch (err) {
+      console.error('Error saving tip edit:', err)
+      setEditing(null)
+      setEditForm({})
     }
-    setEditing(null)
-    setEditForm({})
   }
 
   const cancelEdit = () => {
