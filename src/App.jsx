@@ -13,6 +13,7 @@ import CPTLibrary from './components/CPTLibrary'
 import CodingAcademy from './components/CodingAcademy'
 import ProfilePage from './components/ProfilePage'
 import TabBar from './components/TabBar'
+import { useInstallPrompt, InstallBanner } from './components/InstallPrompt'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -23,6 +24,7 @@ export default function App() {
   const [showNewCase, setShowNewCase] = useState(false)
   const [showNewTip, setShowNewTip] = useState(false)
   const [selectedCase, setSelectedCase] = useState(null)
+  const { showBanner, install, dismiss, isIOS } = useInstallPrompt()
 
   // Load persisted data on mount
   useEffect(() => {
@@ -177,6 +179,10 @@ export default function App() {
       )}
 
       <TabBar activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); setSelectedCase(null); }} />
+
+      {showBanner && (
+        <InstallBanner onInstall={install} onDismiss={dismiss} isIOS={isIOS} />
+      )}
 
       {showNewCase && (
         <NewCaseForm 
