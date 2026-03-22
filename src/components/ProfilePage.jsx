@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function ProfilePage({ user, onUpdateUser, cases, onExport }) {
+export default function ProfilePage({ user, onUpdateUser, cases, onExport, onSignOut }) {
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({ ...user })
 
@@ -131,6 +131,27 @@ export default function ProfilePage({ user, onUpdateUser, cases, onExport }) {
           Download a backup of all your cases, tips, and profile data
         </p>
       </div>
+
+      {onSignOut && (
+        <button
+          onClick={onSignOut}
+          style={{
+            display: 'block',
+            width: '100%',
+            padding: '12px 16px',
+            background: 'rgba(255,80,80,0.1)',
+            border: '1px solid rgba(255,80,80,0.3)',
+            borderRadius: 10,
+            color: '#ff6b6b',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            marginTop: 16,
+          }}
+        >
+          Sign Out
+        </button>
+      )}
 
       <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 20, marginBottom: 20 }}>
         OrthoLog v1.0 · Built for UCF/HCA Ocala Orthopaedic Surgery

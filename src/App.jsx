@@ -2,6 +2,10 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { SAMPLE_CASES, SAMPLE_TIPS } from './data/sampleData'
 import { CPT_CODES, CPT_CATEGORIES, REDUCTION_AIDS, IMPLANT_TYPES, APPROACHES, DEFAULT_ATTENDINGS } from './data/cptCodes'
 import { loadCases, saveCases, loadTips, saveTips, loadUser, saveUser, exportAllData } from './lib/storage'
+import { useAuth } from './lib/auth'
+import { isSupabaseConfigured } from './lib/supabase'
+import { upsertUserProfile, getUserProfile, loadCasesFromSupabase, saveCaseToSupabase, loadTipsFromSupabase } from './lib/dataService'
+import AuthScreen from './components/AuthScreen'
 import OnboardingScreen from './components/OnboardingScreen'
 import Dashboard from './components/Dashboard'
 import CaseList from './components/CaseList'
@@ -16,6 +20,7 @@ import TabBar from './components/TabBar'
 import { useInstallPrompt, InstallBanner } from './components/InstallPrompt'
 
 export default function App() {
+  const { session, user: authUser, loading: authLoading, signOut, isSupabaseEnabled } = useAuth()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -26,24 +31,115 @@ export default function App() {
   const [selectedCase, setSelectedCase] = useState(null)
   const { showBanner, install, dismiss, isIOS } = useInstallPrompt()
 
-  // Load persisted data on mount
+  // Load data based on auth state
   useEffect(() => {
-    const savedUser = loadUser()
-    const savedCases = loadCases()
-    const savedTips = loadTips()
-    
-    setUser(savedUser)
-    setCases(savedCases || SAMPLE_CASES)
-    setTips(savedTips || SAMPLE_TIPS)
-    setIsLoading(false)
-  }, [])
+    if (authLoading) return
 
-  // Persist cases whenever they change
+    const loadData = async () => {
+      if (isSupabaseEnabled && authUser) {
+        // Authenticated with Supabase — load from cloud
+        const profile = await getUserProfile(authUser.id)
+        if (profile) {
+          setUser({
+            id: profile.id,
+            displayName: profile.display_name,
+            email: profile.email,
+            pgyYear: profile.pgy_year,
+            program: profile.programs?.name || 'Unknown Program',
+            programId: profile.program_id,
+            role: profile.role,
+            tier: profile.tier,
+          })
+        } else {
+          // First login — create profile
+          const newProfile = await upsertUserProfile(authUser)
+          if (newProfile) {
+            setUser({
+              id: newProfile.id,
+              displayName: newProfile.display_name,
+              email: newProfile.email,
+              pgyYear: newProfile.pgy_year,
+              program: 'Unknown Program',
+              programId: newProfile.program_id,
+              role: newProfile.role,
+              tier: newProfile.tier,
+            })
+          }
+        }
+        
+        // Load cases from Supabase
+        const cloudCases = await loadCasesFromSupabase(authUser.id)
+        if (cloudCases && cloudCases.length > 0) {
+          // Transform from DB format to app format
+          setCases(cloudCases.map(c => ({
+            id: c.id,
+            date: c.date,
+            patientAge: c.patient_age,
+            patientSex: c.patient_sex,
+            diagnosis: c.diagnosis,
+            category: c.diagnosis,
+            icd10: c.icd10,
+            procedures: c.procedures,
+            approach: c.approach,
+            implants: c.implants,
+            reductionAid: c.reduction_aid,
+            attending: c.attending,
+            role: c.role,
+            complications: c.complications,
+            notes: c.notes,
+            isEmergency: c.is_emergency,
+            bloodLossMl: c.blood_loss_ml,
+            operativeTimeMin: c.operative_time_min,
+            createdAt: c.created_at,
+          })))
+        } else {
+          // No cloud cases — check localStorage for migration
+          const localCases = loadCases()
+          setCases(localCases || SAMPLE_CASES)
+        }
+        
+        // Load tips (from program)
+        const profile2 = await getUserProfile(authUser.id)
+        const cloudTips = await loadTipsFromSupabase(profile2?.program_id)
+        if (cloudTips && cloudTips.length > 0) {
+          setTips(cloudTips.map(t => ({
+            id: t.id,
+            title: t.title,
+            body: t.body,
+            content: t.body,
+            category: t.category,
+            tags: t.tags,
+            cptCodes: t.cpt_codes,
+            createdBy: t.users?.display_name || 'Anonymous',
+            createdAt: t.created_at,
+            likes: 0,
+          })))
+        } else {
+          const localTips = loadTips()
+          setTips(localTips || SAMPLE_TIPS)
+        }
+      } else {
+        // No Supabase or not authenticated — use localStorage
+        const savedUser = loadUser()
+        const savedCases = loadCases()
+        const savedTips = loadTips()
+        setUser(savedUser)
+        setCases(savedCases || SAMPLE_CASES)
+        setTips(savedTips || SAMPLE_TIPS)
+      }
+      
+      setIsLoading(false)
+    }
+    
+    loadData()
+  }, [authLoading, authUser, isSupabaseEnabled])
+
+  // Persist cases whenever they change (localStorage fallback)
   useEffect(() => {
     if (!isLoading) saveCases(cases)
   }, [cases, isLoading])
 
-  // Persist tips whenever they change
+  // Persist tips
   useEffect(() => {
     if (!isLoading) saveTips(tips)
   }, [tips, isLoading])
@@ -69,14 +165,29 @@ export default function App() {
     saveUser(updatedUser)
   }
 
-  const handleAddCase = (newCase) => {
-    setCases(prev => [{
+  const handleSignOut = async () => {
+    if (isSupabaseEnabled) {
+      await signOut()
+    }
+    setUser(null)
+    saveUser(null)
+  }
+
+  const handleAddCase = async (newCase) => {
+    const caseWithMeta = {
       ...newCase,
       id: String(Date.now()),
       createdBy: user?.displayName || 'Anonymous',
       createdAt: new Date().toISOString(),
-    }, ...prev])
+    }
+    
+    setCases(prev => [caseWithMeta, ...prev])
     setShowNewCase(false)
+    
+    // Also save to Supabase if connected
+    if (isSupabaseEnabled && authUser) {
+      await saveCaseToSupabase(caseWithMeta, authUser.id)
+    }
   }
 
   const handleAddTip = (newTip) => {
@@ -105,7 +216,8 @@ export default function App() {
     URL.revokeObjectURL(url)
   }
 
-  if (isLoading) {
+  // Loading state
+  if (isLoading || authLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
@@ -116,7 +228,13 @@ export default function App() {
     )
   }
 
-  if (!user) {
+  // Auth screen (if Supabase is configured but no session)
+  if (isSupabaseEnabled && !authUser) {
+    return <AuthScreen />
+  }
+
+  // Onboarding (localStorage fallback — no Supabase)
+  if (!isSupabaseEnabled && !user) {
     return <OnboardingScreen onComplete={handleOnboardingComplete} />
   }
 
@@ -141,7 +259,7 @@ export default function App() {
       case 'coding':
         return <CodingAcademy />
       case 'profile':
-        return <ProfilePage user={user} onUpdateUser={handleUpdateUser} cases={cases} onExport={handleExport} />
+        return <ProfilePage user={user} onUpdateUser={handleUpdateUser} cases={cases} onExport={handleExport} onSignOut={isSupabaseEnabled ? handleSignOut : undefined} />
       default:
         return <Dashboard stats={stats} cases={cases} tips={tips} onSelectCase={setSelectedCase} />
     }
@@ -157,6 +275,11 @@ export default function App() {
             <p style={{ fontSize: 11, opacity: 0.8, lineHeight: 1.2 }}>UCF/HCA Ocala — Orthopaedic Surgery</p>
           </div>
         </div>
+        {isSupabaseEnabled && authUser && (
+          <div style={{ fontSize: 11, opacity: 0.6 }}>
+            ☁️ {authUser.email.split('@')[0]}
+          </div>
+        )}
       </header>
 
       <main className="page">
