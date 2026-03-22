@@ -221,7 +221,7 @@ export default function App() {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
-          <img src="/rocf-logo.png" alt="OrthoLog" style={{ width: 80, height: 80, objectFit: 'contain' }} />
+          <img src="/ortholog/rocf-logo.png" alt="OrthoLog" style={{ width: 80, height: 80, objectFit: 'contain' }} />
           <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>Loading...</p>
         </div>
       </div>
@@ -269,7 +269,7 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/rocf-logo.png" alt="ROCF" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 6 }} />
+          <img src="/ortholog/rocf-logo.png" alt="ROCF" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 6 }} />
           <div>
             <h1 style={{ fontSize: 18, lineHeight: 1.2 }}>OrthoLog</h1>
             <p style={{ fontSize: 11, opacity: 0.8, lineHeight: 1.2 }}>UCF/HCA Ocala — Orthopaedic Surgery</p>

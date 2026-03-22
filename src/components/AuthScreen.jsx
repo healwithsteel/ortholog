@@ -84,7 +84,7 @@ export default function AuthScreen({ onAuthComplete }) {
     }}>
       {/* Logo & Title */}
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <img src="/rocf-logo.png" alt="OrthoLog" style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 16, marginBottom: 12 }} />
+        <img src="/ortholog/rocf-logo.png" alt="OrthoLog" style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: 16, marginBottom: 12 }} />
         <h1 style={{ fontSize: 28, color: '#fff', fontWeight: 700, margin: 0 }}>OrthoLog</h1>
         <p style={{ color: '#8899aa', fontSize: 14, marginTop: 4 }}>Case Tracker for Orthopaedic Residents</p>
       </div>
