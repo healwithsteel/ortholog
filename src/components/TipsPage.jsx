@@ -1,71 +1,97 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 
 export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
   const [expanded, setExpanded] = useState(null)
   const [editing, setEditing] = useState(null)
-  const [editForm, setEditForm] = useState({})
+  const [editTitle, setEditTitle] = useState('')
+  const [editBody, setEditBody] = useState('')
+  const [editCategory, setEditCategory] = useState('trauma')
+  const [editProcedure, setEditProcedure] = useState('')
+  const [editTags, setEditTags] = useState('')
   const [filter, setFilter] = useState('all')
 
   const categories = ['all', ...new Set(tips.map(t => t.category).filter(Boolean))]
   
   const filtered = filter === 'all' ? tips : tips.filter(t => t.category === filter)
 
-  const handleLike = (tipId) => {
+  const handleLike = useCallback((e, tipId) => {
+    e.preventDefault()
+    e.stopPropagation()
     const tip = tips.find(t => t.id === tipId)
     if (tip && onUpdateTip) {
       onUpdateTip({ ...tip, likes: (tip.likes || 0) + 1 })
     }
-  }
+  }, [tips, onUpdateTip])
 
-  const startEdit = (tip) => {
+  const startEdit = useCallback((e, tip) => {
+    e.preventDefault()
+    e.stopPropagation()
     setEditing(tip.id)
+    setExpanded(tip.id)
+    setEditTitle(tip.title || '')
+    setEditBody(tip.body || '')
+    setEditCategory(tip.category || 'trauma')
+    setEditProcedure(tip.procedure || '')
     const tagArr = Array.isArray(tip.tags) ? tip.tags : []
-    setEditForm({
-      title: tip.title || '',
-      body: tip.body || '',
-      category: tip.category || 'trauma',
-      procedure: tip.procedure || '',
-      tags: tagArr.join(', '),
-    })
-  }
+    setEditTags(tagArr.join(', '))
+  }, [])
 
-  const saveEdit = (tipId) => {
-    try {
-      const tip = tips.find(t => t.id === tipId)
-      if (tip && onUpdateTip) {
-        const tagsStr = editForm.tags || ''
-        const parsedTags = typeof tagsStr === 'string' 
-          ? tagsStr.split(',').map(t => t.trim()).filter(Boolean)
-          : Array.isArray(tagsStr) ? tagsStr : []
-        
-        const updated = {
-          ...tip,
-          title: editForm.title || tip.title,
-          body: editForm.body || tip.body,
-          category: editForm.category || tip.category,
-          procedure: editForm.procedure || tip.procedure,
-          tags: parsedTags,
-        }
-        // Exit edit mode FIRST to prevent re-render conflict
-        setEditing(null)
-        setEditForm({})
-        // Then update the tip
-        onUpdateTip(updated)
-      } else {
-        setEditing(null)
-        setEditForm({})
-      }
-    } catch (err) {
-      console.error('Error saving tip edit:', err)
+  const saveEdit = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const tipId = editing
+    if (!tipId) return
+    
+    const tip = tips.find(t => t.id === tipId)
+    if (!tip) {
       setEditing(null)
-      setEditForm({})
+      return
     }
-  }
 
-  const cancelEdit = () => {
+    const tagsStr = editTags || ''
+    const parsedTags = tagsStr.split(',').map(t => t.trim()).filter(Boolean)
+    
+    const updated = {
+      ...tip,
+      title: editTitle || tip.title,
+      body: editBody || tip.body,
+      category: editCategory || tip.category,
+      procedure: editProcedure,
+      tags: parsedTags,
+    }
+    
+    // Clear edit state first
     setEditing(null)
-    setEditForm({})
-  }
+    
+    // Then update after a tick to avoid re-render conflicts
+    setTimeout(() => {
+      if (onUpdateTip) onUpdateTip(updated)
+    }, 0)
+  }, [editing, editTitle, editBody, editCategory, editProcedure, editTags, tips, onUpdateTip])
+
+  const cancelEdit = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setEditing(null)
+  }, [])
+
+  const handleCardClick = useCallback((tipId) => {
+    // Don't toggle expand if we're in edit mode
+    if (editing) return
+    setExpanded(prev => prev === tipId ? null : tipId)
+  }, [editing])
+
+  const handleShare = useCallback((e, tip) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const text = `💡 ${tip.title}\n\n${tip.body}\n${tip.tags?.length ? '\n#' + tip.tags.join(' #') : ''}\n\n— Shared via OrthoLog`
+    if (navigator.share) {
+      navigator.share({ title: tip.title, text }).catch(() => {})
+    } else {
+      navigator.clipboard.writeText(text).catch(() => {})
+    }
+  }, [])
 
   return (
     <div>
@@ -103,7 +129,7 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
       </div>
 
       <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
-        {filtered.length} tip{filtered.length !== 1 ? 's' : ''} · Tap to expand · Long-press to edit
+        {filtered.length} tip{filtered.length !== 1 ? 's' : ''} · Tap to expand · Tap edit to modify
       </p>
 
       {filtered.length === 0 && (
@@ -118,25 +144,27 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
         <div
           key={tip.id}
           className="tip-card"
-          onClick={() => setExpanded(expanded === tip.id ? null : tip.id)}
-          style={{ cursor: 'pointer', transition: 'all 0.2s' }}
+          onClick={() => handleCardClick(tip.id)}
+          style={{ cursor: editing === tip.id ? 'default' : 'pointer', transition: 'all 0.2s' }}
         >
           {editing === tip.id ? (
-            /* Edit mode */
-            <div onClick={e => e.stopPropagation()}>
-              <div className="form-group" style={{ marginBottom: 8 }}>
+            /* Edit mode — completely isolated from card click */
+            <div onClick={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Title</label>
                 <input
                   type="text"
-                  value={editForm.title}
-                  onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
-                  style={{ fontSize: 15, fontWeight: 700, width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--border)' }}
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                  style={{ fontSize: 15, fontWeight: 700, width: '100%', padding: 8, borderRadius: 6, border: '1px solid var(--border)', boxSizing: 'border-box' }}
                 />
               </div>
-              <div className="form-group" style={{ marginBottom: 8 }}>
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Category</label>
                 <select
-                  value={editForm.category}
-                  onChange={e => setEditForm(f => ({ ...f, category: e.target.value }))}
-                  style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
+                  value={editCategory}
+                  onChange={e => setEditCategory(e.target.value)}
+                  style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid var(--border)', fontSize: 13, boxSizing: 'border-box' }}
                 >
                   <option value="trauma">Trauma</option>
                   <option value="recon">Reconstruction</option>
@@ -148,32 +176,48 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
                   <option value="general">General</option>
                 </select>
               </div>
-              <div className="form-group" style={{ marginBottom: 8 }}>
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Content</label>
                 <textarea
-                  value={editForm.body}
-                  onChange={e => setEditForm(f => ({ ...f, body: e.target.value }))}
-                  style={{ width: '100%', minHeight: 100, padding: 8, borderRadius: 6, border: '1px solid var(--border)', fontSize: 14, lineHeight: 1.6 }}
+                  value={editBody}
+                  onChange={e => setEditBody(e.target.value)}
+                  style={{ width: '100%', minHeight: 100, padding: 8, borderRadius: 6, border: '1px solid var(--border)', fontSize: 14, lineHeight: 1.6, boxSizing: 'border-box', resize: 'vertical' }}
                 />
               </div>
-              <div className="form-group" style={{ marginBottom: 8 }}>
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Procedure</label>
                 <input
                   type="text"
-                  value={editForm.tags}
-                  onChange={e => setEditForm(f => ({ ...f, tags: e.target.value }))}
+                  value={editProcedure}
+                  onChange={e => setEditProcedure(e.target.value)}
+                  placeholder="Related procedure (optional)"
+                  style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid var(--border)', fontSize: 13, boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Tags</label>
+                <input
+                  type="text"
+                  value={editTags}
+                  onChange={e => setEditTags(e.target.value)}
                   placeholder="Tags (comma separated)"
-                  style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
+                  style={{ width: '100%', padding: 6, borderRadius: 6, border: '1px solid var(--border)', fontSize: 13, boxSizing: 'border-box' }}
                 />
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
+                  type="button"
                   onClick={cancelEdit}
-                  style={{ flex: 1, padding: 8, borderRadius: 6, border: '1px solid var(--border)', background: 'white', fontSize: 13, cursor: 'pointer' }}
+                  onTouchEnd={cancelEdit}
+                  style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'white', fontSize: 14, cursor: 'pointer', fontWeight: 600 }}
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={() => saveEdit(tip.id)}
-                  style={{ flex: 1, padding: 8, borderRadius: 6, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                  type="button"
+                  onClick={saveEdit}
+                  onTouchEnd={saveEdit}
+                  style={{ flex: 1, padding: 10, borderRadius: 8, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
                 >
                   ✓ Save
                 </button>
@@ -227,7 +271,8 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
                   {/* Action buttons */}
                   <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleLike(tip.id) }}
+                      type="button"
+                      onClick={(e) => handleLike(e, tip.id)}
                       style={{
                         flex: 1, padding: '8px 0', borderRadius: 8,
                         border: '1px solid var(--border)', background: 'white',
@@ -237,7 +282,8 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
                       ❤️ {tip.likes || 0}
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); startEdit(tip) }}
+                      type="button"
+                      onClick={(e) => startEdit(e, tip)}
                       style={{
                         flex: 1, padding: '8px 0', borderRadius: 8,
                         border: '1px solid var(--border)', background: 'white',
@@ -247,15 +293,8 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
                       ✏️ Edit
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        const text = `💡 ${tip.title}\n\n${tip.body}\n${tip.tags?.length ? '\n#' + tip.tags.join(' #') : ''}\n\n— Shared via OrthoLog`
-                        if (navigator.share) {
-                          navigator.share({ title: tip.title, text })
-                        } else {
-                          navigator.clipboard.writeText(text)
-                        }
-                      }}
+                      type="button"
+                      onClick={(e) => handleShare(e, tip)}
                       style={{
                         flex: 1, padding: '8px 0', borderRadius: 8,
                         border: '1px solid var(--border)', background: 'white',
@@ -284,6 +323,11 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
 }
 
 function formatDate(dateStr) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  } catch {
+    return ''
+  }
 }
