@@ -52,11 +52,21 @@ function ScenarioTrainer() {
 
   if (selectedScenario) {
     const sc = selectedScenario
-    const allCodeOptions = [...sc.correctCodes, ...(sc.distractors || [])].sort(() => Math.random() - 0.5)
-    const modifierOptions = ['AS', '22', '50', '58', '59', '62', '78', '79', 'LT', 'RT']
+  // Memoize shuffled code options so they don't re-shuffle on every render
+  const allCodeOptions = useMemo(() => {
+    if (!selectedScenario) return []
+    return [...selectedScenario.correctCodes, ...(selectedScenario.distractors || [])]
+      .sort((a, b) => {
+        // Deterministic shuffle based on code — same order every render
+        const hashA = a.code.split('').reduce((s, c) => s + c.charCodeAt(0), 0)
+        const hashB = b.code.split('').reduce((s, c) => s + c.charCodeAt(0), 0)
+        return hashA - hashB
+      })
+  }, [selectedScenario])
+  const modifierOptions = useMemo(() => ['AS', '22', '50', '58', '59', '62', '78', '79', 'LT', 'RT'], [])
     
-    const correctCodeSet = new Set(sc.correctCodes.map(c => c.code))
-    const correctModSet = new Set(sc.correctModifiers)
+  const correctCodeSet = useMemo(() => selectedScenario ? new Set(selectedScenario.correctCodes.map(c => c.code)) : new Set(), [selectedScenario])
+  const correctModSet = useMemo(() => selectedScenario ? new Set(selectedScenario.correctModifiers) : new Set(), [selectedScenario])
     
     const codeScore = showResult ? (() => {
       const userSet = new Set(userAnswer.codes)
@@ -114,7 +124,7 @@ function ScenarioTrainer() {
               else if (!isSelected && isCorrect) { borderColor = '#f59e0b'; bgColor = '#fef3c7' }
             }
             return (
-              <button key={i} onClick={() => !showResult && toggleCode(opt.code)}
+              <button key={opt.code} onClick={() => !showResult && toggleCode(opt.code)}
                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 10, border: `2px solid ${borderColor}`, background: bgColor, cursor: showResult ? 'default' : 'pointer', textAlign: 'left' }}>
                 <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 15, minWidth: 55 }}>{opt.code}</span>
                 <span style={{ fontSize: 13, color: '#475569', flex: 1 }}>{opt.desc}</span>

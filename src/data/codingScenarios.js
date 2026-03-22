@@ -234,8 +234,8 @@ export const CODING_SCENARIOS = [
   {
     id: 'sc4',
     difficulty: 'senior',
-    title: 'Bimalleolar Equivalent — Separate Fixation',
-    scenario: 'A 67-year-old female falls and sustains a bimalleolar ankle fracture with posterior malleolus involvement (trimalleolar pattern). Through a lateral incision, you plate the fibula. Through a separate medial incision, you fix the medial malleolus with two screws. The posterior fragment is reduced by ligamentotaxis with the lateral plate. PA-C assists. 75 minutes.',
+    title: 'Trimalleolar Ankle — Separate Fixation (No Posterior Hardware)',
+    scenario: 'A 67-year-old female falls and sustains a trimalleolar ankle fracture. Through a lateral incision, you plate the fibula. Through a separate medial incision, you fix the medial malleolus with two screws. The posterior malleolus fragment is small and reduces with ligamentotaxis — no separate posterior fixation is performed. PA-C assists. 75 minutes.',
     correctCodes: [
       { code: '27766', desc: 'ORIF medial malleolus fracture', primary: false },
       { code: '27792', desc: 'ORIF distal fibula fracture', primary: true },
