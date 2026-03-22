@@ -134,14 +134,20 @@ export default function App() {
     loadData()
   }, [authLoading, authUser, isSupabaseEnabled])
 
-  // Persist cases whenever they change (localStorage fallback)
+  // Persist cases whenever they change (localStorage fallback, debounced)
   useEffect(() => {
-    if (!isLoading) saveCases(cases)
+    if (!isLoading) {
+      const timer = setTimeout(() => saveCases(cases), 300)
+      return () => clearTimeout(timer)
+    }
   }, [cases, isLoading])
 
-  // Persist tips
+  // Persist tips (debounced to prevent freeze on rapid updates)
   useEffect(() => {
-    if (!isLoading) saveTips(tips)
+    if (!isLoading) {
+      const timer = setTimeout(() => saveTips(tips), 300)
+      return () => clearTimeout(timer)
+    }
   }, [tips, isLoading])
 
   const stats = useMemo(() => ({

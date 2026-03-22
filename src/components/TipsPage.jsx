@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 
 export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
   const [expanded, setExpanded] = useState(null)
@@ -10,9 +10,9 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
   const [editTags, setEditTags] = useState('')
   const [filter, setFilter] = useState('all')
 
-  const categories = ['all', ...new Set(tips.map(t => t.category).filter(Boolean))]
+  const categories = useMemo(() => ['all', ...new Set(tips.map(t => t.category).filter(Boolean))], [tips])
   
-  const filtered = filter === 'all' ? tips : tips.filter(t => t.category === filter)
+  const filtered = useMemo(() => filter === 'all' ? tips : tips.filter(t => t.category === filter), [tips, filter])
 
   const handleLike = useCallback((e, tipId) => {
     e.preventDefault()
@@ -208,7 +208,6 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
                 <button
                   type="button"
                   onClick={cancelEdit}
-                  onTouchEnd={cancelEdit}
                   style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'white', fontSize: 14, cursor: 'pointer', fontWeight: 600 }}
                 >
                   Cancel
@@ -216,7 +215,6 @@ export default function TipsPage({ tips, onNewTip, onUpdateTip, onDeleteTip }) {
                 <button
                   type="button"
                   onClick={saveEdit}
-                  onTouchEnd={saveEdit}
                   style={{ flex: 1, padding: 10, borderRadius: 8, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
                 >
                   ✓ Save
