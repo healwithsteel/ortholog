@@ -73,9 +73,25 @@ A native mobile app for orthopaedic surgery residents to log surgical cases, sha
 | display_name | text | e.g., "Adam Daniel" |
 | pgy_year | int | 1-5 |
 | class_year | int | e.g., 2031 |
-| program | text | e.g., "UCF/HCA Ocala" |
+| program_id | uuid | FK → programs |
 | role | text | 'resident' \| 'faculty' \| 'admin' |
+| tier | text | 'free' \| 'pro' (default: 'free') |
 | avatar_url | text | nullable |
+| created_at | timestamptz | |
+
+### `programs`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK |
+| name | text | e.g., "UCF/HCA Ocala" |
+| institution | text | e.g., "University of Central Florida" |
+| city | text | e.g., "Ocala" |
+| state | text | e.g., "FL" |
+| license_tier | text | 'free' \| 'licensed' (default: 'free') |
+| license_expires | timestamptz | nullable — null = free forever |
+| invite_code | text | Unique, for resident onboarding |
+| pd_user_id | uuid | FK → users (Program Director) |
+| custom_logo_url | text | nullable — for white-label |
 | created_at | timestamptz | |
 
 ### `cases`
@@ -297,11 +313,87 @@ A native mobile app for orthopaedic surgery residents to log surgical cases, sha
 - Anonymous cross-program benchmarking
 - Potential ACGME integration if they open an API
 
-### Revenue Model (if scaling)
-- Free for UCF residents (always)
-- $5/resident/month for other programs (program pays, not residents)
-- Faculty premium features: $10/month
-- White-label option for programs wanting their own branded version
+### Revenue Model — Freemium Strategy
+
+**Core Principle**: Never charge individual residents. They're broke. Build adoption first, monetize through institutions.
+
+#### Free Tier (all residents, forever)
+- Case logging with full CPT library (120+ codes)
+- Tips & Tricks feed (read, write, like)
+- Basic analytics (case count, category breakdown)
+- X-ray upload with EXIF stripping & PHI confirmation
+- Profile & case volume summary
+- UCF/HCA Ocala residents are **always free** regardless of tier
+
+#### Pro Tier — $3-5/month (individual opt-in)
+- Advanced X-ray annotation tools (arrows, circles, lines, text, freehand)
+- Interactive analytics dashboards (charts, trends, attending breakdown)
+- PGY-year benchmarking (anonymous: "You vs. PGY-1 average")
+- Export to PDF for interview portfolio
+- AI-powered case suggestions ("You haven't logged a hand case in 3 months")
+- Share cases via link with rich previews
+- Voice notes (speech-to-text for post-case logging)
+- Dark mode (yes, people will pay for this)
+
+#### Program License — $500-1,000/year per program
+- Sold to the **program/department**, not individual residents
+- Aggregate analytics dashboard for Program Director:
+  - Case volume by resident, category, attending, PGY year
+  - Training gap identification ("No one has logged a pelvic case this quarter")
+  - Subspecialty exposure distribution
+  - ACGME milestone correlation data (non-binding reference)
+- Faculty accounts with elevated permissions (pin tips, moderate, feature "Case of the Day")
+- Program invite system (bulk onboarding)
+- Custom branding option (program logo on splash screen)
+- Priority support & feature requests
+- Annual data export for program review
+
+#### Financial Projections
+
+**Year 1 (5-10 external programs adopt)**
+| Source | Low | High |
+|--------|-----|------|
+| Pro tier (10% of ~75 users) | $270 | $450 |
+| Program licenses (5-10 × $500-1,000) | $2,500 | $10,000 |
+| **Total** | **$2,770** | **$10,450** |
+
+**Year 2 (20-40 programs)**
+| Source | Low | High |
+|--------|-----|------|
+| Pro tier (10-15% of ~350 users) | $1,260 | $3,150 |
+| Program licenses (20-40 × $500-1,000) | $10,000 | $40,000 |
+| **Total** | **$11,260** | **$43,150** |
+
+**Year 3 (50-80 programs)**
+| Source | Low | High |
+|--------|-----|------|
+| Pro tier (10-15% of ~800 users) | $2,880 | $7,200 |
+| Program licenses (50-80 × $500-1,000) | $25,000 | $80,000 |
+| **Total** | **$27,880** | **$87,200** |
+
+**Costs remain minimal**: ~$99/yr Apple + $25 Google (one-time) + $0-25/mo Supabase = under $500/yr total.
+
+#### Long-Term Platform Play (Year 3+)
+Once 50+ programs are on OrthoLog:
+- **Implant company partnerships**: Sponsored educational content, implant-specific case studies (clearly labeled, non-intrusive)
+- **Textbook/publisher integrations**: Link CPT codes to relevant chapters (Rockwood, Hoppenfeld)
+- **CME provider partnerships**: Earn CME credit for case logging milestones
+- **Conference integration**: Log cases from visiting rotations, fellowships
+- **Residency recruitment**: Programs with OrthoLog can showcase their case diversity to applicants
+- **Data analytics (de-identified)**: National ortho training trends, procedure volume benchmarking
+- **White-label licensing**: $5,000-10,000/yr for programs wanting fully branded versions
+
+#### Market Context
+- ~5,800 orthopaedic surgery residents in the US
+- ~1,160 new residents per year across ~200 programs
+- No dominant case-tracking app exists (ACGME's system is mandatory but universally hated)
+- **OrthoLog fills the gap**: what residents actually want to use vs. what they're forced to use
+
+#### Why This Works
+1. **Zero friction adoption**: Free = viral. Residents tell co-residents. Programs hear about it from residents.
+2. **Programs have budgets**: $500-1,000/yr is a rounding error next to simulation lab costs ($50K+), cadaver labs ($10K+), and textbook stipends ($500+)
+3. **Network effects**: The more users, the more tips, the more valuable the platform
+4. **Karl Siebuhr becomes the guy**: The trauma surgeon who built the tool every ortho resident uses. That reputation > the revenue.
 
 ---
 
