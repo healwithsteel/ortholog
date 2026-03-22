@@ -17,8 +17,8 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
         img.onload = () => {
           // Draw to canvas — this strips ALL EXIF/metadata
           const canvas = document.createElement('canvas')
-          // Limit max dimension to 2048px for storage efficiency
-          const maxDim = 2048
+          // Limit max dimension to 1200px for storage efficiency (base64 in localStorage)
+          const maxDim = 1200
           let w = img.width
           let h = img.height
           if (w > maxDim || h > maxDim) {
@@ -34,10 +34,10 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
           canvas.height = h
           const ctx = canvas.getContext('2d')
           ctx.drawImage(img, 0, 0, w, h)
-          // Convert to blob — JPEG at 85% quality, all metadata stripped
+          // Convert to blob — JPEG at 70% quality for smaller base64 footprint
           canvas.toBlob((blob) => {
             resolve(blob)
-          }, 'image/jpeg', 0.85)
+          }, 'image/jpeg', 0.70)
         }
         img.src = e.target.result
       }
@@ -54,6 +54,15 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
     window._pendingXrayFiles = pendingFiles
   }, [])
 
+  // Convert blob to base64 data URL for persistent storage
+  const blobToDataUrl = useCallback((blob) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result)
+      reader.readAsDataURL(blob)
+    })
+  }, [])
+
   const confirmUpload = useCallback(async () => {
     const files = window._pendingXrayFiles || []
     setShowWarning(false)
@@ -61,11 +70,11 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
     const newImages = []
     for (const file of files) {
       const stripped = await stripExif(file)
-      const url = URL.createObjectURL(stripped)
+      // Convert to base64 data URL so it persists in localStorage across sessions
+      const dataUrl = await blobToDataUrl(stripped)
       newImages.push({
         id: 'xr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-        url,
-        blob: stripped,
+        url: dataUrl,
         viewType: 'AP',
         caption: '',
         uploadedAt: new Date().toISOString(),
@@ -78,7 +87,7 @@ export default function XRayUploader({ caseId, existingImages = [], onImagesChan
     setImages(updated)
     onImagesChange?.(updated)
     window._pendingXrayFiles = null
-  }, [images, stripExif, onImagesChange])
+  }, [images, stripExif, blobToDataUrl, onImagesChange])
 
   const cancelUpload = useCallback(() => {
     setShowWarning(false)
