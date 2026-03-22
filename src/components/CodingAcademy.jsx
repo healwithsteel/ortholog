@@ -50,23 +50,23 @@ function ScenarioTrainer() {
     }))
   }, [])
 
-  if (selectedScenario) {
-    const sc = selectedScenario
-  // Memoize shuffled code options so they don't re-shuffle on every render
+  // Memoize code options so they don't re-shuffle on every render (MUST be before conditionals — Rules of Hooks)
   const allCodeOptions = useMemo(() => {
     if (!selectedScenario) return []
     return [...selectedScenario.correctCodes, ...(selectedScenario.distractors || [])]
       .sort((a, b) => {
-        // Deterministic shuffle based on code — same order every render
         const hashA = a.code.split('').reduce((s, c) => s + c.charCodeAt(0), 0)
         const hashB = b.code.split('').reduce((s, c) => s + c.charCodeAt(0), 0)
         return hashA - hashB
       })
   }, [selectedScenario])
+
   const modifierOptions = useMemo(() => ['AS', '22', '50', '58', '59', '62', '78', '79', 'LT', 'RT'], [])
-    
   const correctCodeSet = useMemo(() => selectedScenario ? new Set(selectedScenario.correctCodes.map(c => c.code)) : new Set(), [selectedScenario])
   const correctModSet = useMemo(() => selectedScenario ? new Set(selectedScenario.correctModifiers) : new Set(), [selectedScenario])
+
+  if (selectedScenario) {
+    const sc = selectedScenario
     
     const codeScore = showResult ? (() => {
       const userSet = new Set(userAnswer.codes)
