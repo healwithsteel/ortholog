@@ -235,12 +235,12 @@ export const CODING_SCENARIOS = [
     id: 'sc4',
     difficulty: 'senior',
     title: 'Trimalleolar Ankle — Separate Fixation (No Posterior Hardware)',
-    scenario: 'A 67-year-old female falls and sustains a trimalleolar ankle fracture. Through a lateral incision, you plate the fibula. Through a separate medial incision, you fix the medial malleolus with two screws. The posterior malleolus fragment is small and reduces with ligamentotaxis — no separate posterior fixation is performed. PA-C assists. 75 minutes.',
+    scenario: 'A 67-year-old female falls and sustains a trimalleolar ankle fracture. Through a lateral incision, you plate the fibula. Through a separate medial incision, you fix the medial malleolus with two screws. The posterior malleolus fragment is small and reduces with ligamentotaxis — no separate posterior fixation is performed. 75 minutes.',
     correctCodes: [
       { code: '27766', desc: 'ORIF medial malleolus fracture', primary: false },
       { code: '27792', desc: 'ORIF distal fibula fracture', primary: true },
     ],
-    correctModifiers: ['AS', '59'],
+    correctModifiers: ['59'],
     correctDiagnoses: [
       'S82.61XA — Displaced fracture of lateral malleolus',
       'S82.51XA — Displaced fracture of medial malleolus',
@@ -253,7 +253,7 @@ export const CODING_SCENARIOS = [
 
 **Posterior malleolus:** You didn't separately fix it — it reduced with ligamentotaxis. If you had placed separate screws through a posterior approach, you'd add 27769.
 
-**-AS** on both codes for the PA-C.
+**Why no -AS?** Assistant at surgery (modifier -AS/-80) is generally NOT payable for ankle fracture ORIF codes (27766, 27792) with most payers including Medicare. The assistant surgery payment indicator for these codes is typically "2" (not payable). Always check the MPFS assistant surgery indicator before billing -AS. Procedures where -AS IS payable include more complex cases like pelvic/acetabular fractures, spine, and revision arthroplasty.
 
 **Revenue difference:** 27822 (trimalleolar) ≈ $1,200. 27792 + 27766 ≈ $1,800. That's $600 left on the table if you code it wrong.`,
     distractors: [
