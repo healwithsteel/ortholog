@@ -10,6 +10,7 @@ import NewCaseForm from './components/NewCaseForm'
 import TipsPage from './components/TipsPage'
 import NewTipForm from './components/NewTipForm'
 import CPTLibrary from './components/CPTLibrary'
+import CodingAcademy from './components/CodingAcademy'
 import ProfilePage from './components/ProfilePage'
 import TabBar from './components/TabBar'
 
@@ -135,6 +136,8 @@ export default function App() {
         return <TipsPage tips={tips} onNewTip={() => setShowNewTip(true)} onUpdateTip={handleUpdateTip} />
       case 'cpt':
         return <CPTLibrary />
+      case 'coding':
+        return <CodingAcademy />
       case 'profile':
         return <ProfilePage user={user} onUpdateUser={handleUpdateUser} cases={cases} onExport={handleExport} />
       default:
@@ -160,7 +163,7 @@ export default function App() {
         </div>
       </main>
 
-      {!selectedCase && !['cpt', 'profile'].includes(activeTab) && (
+      {!selectedCase && !['cpt', 'profile', 'coding'].includes(activeTab) && (
         <button 
           className="fab" 
           onClick={() => activeTab === 'tips' ? setShowNewTip(true) : setShowNewCase(true)}
