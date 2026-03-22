@@ -10,9 +10,9 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/rocf-logo.webp",
+      "src": "/rocf-logo.png",
       "sizes": "512x512",
-      "type": "image/webp",
+      "type": "image/png",
       "purpose": "any"
     },
     {
