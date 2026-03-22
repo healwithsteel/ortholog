@@ -45,20 +45,56 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
     if (c.reductionAids?.length) lines.push(`🛠️ Reduction Aids: ${c.reductionAids.join(', ')}`)
     if (c.notes) lines.push(``, `📝 Notes:`, c.notes)
     if (c.tips) lines.push(``, `💡 Tip:`, c.tips)
+    if (xrayImages.length > 0) lines.push(``, `🩻 ${xrayImages.length} X-ray image${xrayImages.length > 1 ? 's' : ''} attached`)
     lines.push(``, `---`, `Shared via OrthoLog`)
     return lines.join('\n')
   }
 
+  // Convert data URL to File object for Web Share API
+  const dataUrlToFile = async (dataUrl, filename) => {
+    const res = await fetch(dataUrl)
+    const blob = await res.blob()
+    return new File([blob], filename, { type: blob.type })
+  }
+
   const handleShare = async () => {
     const text = generateShareText()
+    const hasImages = xrayImages.length > 0
+
+    // Try Web Share API with files (supports images on mobile)
     if (navigator.share) {
       try {
-        await navigator.share({ title: `OrthoLog: ${c.procedure}`, text })
+        const shareData = { title: `OrthoLog: ${c.procedure}`, text }
+
+        // If we have images and canShare supports files
+        if (hasImages && navigator.canShare) {
+          const files = []
+          for (let i = 0; i < xrayImages.length; i++) {
+            const img = xrayImages[i]
+            if (img.url && img.url.startsWith('data:')) {
+              const file = await dataUrlToFile(
+                img.url,
+                `xray-${img.viewType}-${i + 1}.jpg`
+              )
+              files.push(file)
+            }
+          }
+          if (files.length > 0) {
+            const testShare = { ...shareData, files }
+            if (navigator.canShare(testShare)) {
+              shareData.files = files
+            }
+          }
+        }
+
+        await navigator.share(shareData)
         setShareStatus('shared')
         setTimeout(() => setShareStatus(null), 2000)
         return
       } catch (err) { if (err.name === 'AbortError') return }
     }
+
+    // Fallback: copy text + offer image download
     try {
       await navigator.clipboard.writeText(text)
       setShareStatus('copied')
@@ -69,6 +105,19 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
       document.body.removeChild(ta)
       setShareStatus('copied')
     }
+
+    // If images exist, also trigger download for desktop users
+    if (hasImages) {
+      xrayImages.forEach((img, i) => {
+        if (img.url && img.url.startsWith('data:')) {
+          const a = document.createElement('a')
+          a.href = img.url
+          a.download = `xray-${img.viewType}-${i + 1}.jpg`
+          a.click()
+        }
+      })
+    }
+
     setTimeout(() => setShareStatus(null), 2000)
   }
 
@@ -331,7 +380,7 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
 
       <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
         <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={handleShare}>
-          {shareStatus === 'copied' ? '✅ Copied!' : shareStatus === 'shared' ? '✅ Shared!' : '📤 Share Case'}
+          {shareStatus === 'copied' ? '✅ Copied!' : shareStatus === 'shared' ? '✅ Shared!' : xrayImages.length > 0 ? `📤 Share + ${xrayImages.length} 🩻` : '📤 Share Case'}
         </button>
         <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={startEdit}>
           ✏️ Edit
