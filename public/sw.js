@@ -1,5 +1,5 @@
 const CACHE_NAME = 'ortholog-v1'
-const OFFLINE_URL = '/'
+const OFFLINE_URL = '/ortholog/'
 
 // Assets to pre-cache
 const PRECACHE_URLS = [

@@ -2,24 +2,18 @@
   "name": "OrthoLog — Case Tracker",
   "short_name": "OrthoLog",
   "description": "Orthopaedic Surgery Resident Case Tracker — UCF/HCA Ocala",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/ortholog/",
+  "scope": "/ortholog/",
   "display": "standalone",
-  "background_color": "#f8f9fa",
+  "background_color": "#0a1628",
   "theme_color": "#1e3a5f",
   "orientation": "any",
   "icons": [
     {
-      "src": "/rocf-logo.png",
+      "src": "/ortholog/rocf-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
     }
   ],
   "categories": ["medical", "education", "productivity"]
