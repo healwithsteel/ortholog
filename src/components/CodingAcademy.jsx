@@ -397,6 +397,9 @@ export default function CodingAcademy() {
         <div style={{ fontSize: 32, marginBottom: 4 }}>🏫</div>
         <h1 style={{ fontSize: 20, marginBottom: 4 }}>Coding Academy</h1>
         <p style={{ fontSize: 13, color: '#64748b' }}>Learn to code like you bill — accurately and completely</p>
+        <p style={{ fontSize: 10, color: '#94a3b8', marginTop: 6, lineHeight: 1.4, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
+          ⚠️ Educational purposes only. Not a substitute for professional coding guidance. Verify all codes with your institution's billing department.
+        </p>
       </div>
 
       {/* Sub-tabs */}

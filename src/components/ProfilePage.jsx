@@ -153,8 +153,11 @@ export default function ProfilePage({ user, onUpdateUser, cases, onExport, onSig
         </button>
       )}
 
-      <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 20, marginBottom: 20 }}>
+      <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 20 }}>
         OrthoLog v1.0 · Built for UCF/HCA Ocala Orthopaedic Surgery
+      </p>
+      <p style={{ textAlign: 'center', fontSize: 10, color: '#94a3b8', marginTop: 8, marginBottom: 20, lineHeight: 1.4, maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
+        © 2026 OrthoLog. All rights reserved. Educational content is for training purposes only and does not constitute professional coding or billing advice. Verify all codes with your institution's billing department.
       </p>
     </div>
   )
