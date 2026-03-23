@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/ortholog/favicon.svg" />
+    <link rel="apple-touch-icon" href="/ortholog/rocf-logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1e3a5f" />
+    <meta name="description" content="OrthoLog — Orthopaedic Surgery Resident Case Tracker" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="OrthoLog" />
+    <link rel="manifest" href="/ortholog/manifest.json" />
+    <title>OrthoLog</title>
+    <script type="module" crossorigin src="/ortholog/assets/index-svMgnnt5.js"></script>
+    <link rel="stylesheet" crossorigin href="/ortholog/assets/index-DtW8Xw0f.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Register service worker for PWA / Add to Home Screen
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => {
+              console.log('OrthoLog SW registered:', reg.scope)
+            })
+            .catch((err) => {
+              console.log('OrthoLog SW registration failed:', err)
+            })
+        })
+      }
+    </script>
+  </body>
+</html>
