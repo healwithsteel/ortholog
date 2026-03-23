@@ -12,7 +12,9 @@ export default function NewCaseForm({ onSubmit, onClose, cptCodes, reductionAids
     role: 'First assistant',
     position: '',
     implants: [],
+    implantCustom: '',
     reductionAids: [],
+    reductionAidCustom: '',
     notes: '',
     tips: '',
     shared: true,
@@ -20,6 +22,17 @@ export default function NewCaseForm({ onSubmit, onClose, cptCodes, reductionAids
   })
   const [cptSearch, setCptSearch] = useState('')
   const [showCptPicker, setShowCptPicker] = useState(false)
+  const [showOpDetails, setShowOpDetails] = useState(false)
+  const [implantSearch, setImplantSearch] = useState('')
+  const [reductionSearch, setReductionSearch] = useState('')
+
+  const filteredImplants = implantTypes.filter(imp =>
+    !implantSearch || imp.toLowerCase().includes(implantSearch.toLowerCase())
+  )
+
+  const filteredReductionAids = reductionAids.filter(aid =>
+    !reductionSearch || aid.toLowerCase().includes(reductionSearch.toLowerCase())
+  )
 
   const filteredCpt = cptCodes.filter(c => 
     cptSearch && (
@@ -128,54 +141,146 @@ export default function NewCaseForm({ onSubmit, onClose, cptCodes, reductionAids
           </div>
 
           <div className="form-group">
-            <label>Patient Position</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 150, overflowY: 'auto' }}>
-              {(positions || []).map(pos => (
-                <button
-                  type="button"
-                  key={pos}
-                  className={`category-pill ${form.position === pos ? 'active' : ''}`}
-                  onClick={() => setForm(f => ({...f, position: f.position === pos ? '' : pos}))}
-                >
-                  {pos}
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowOpDetails(!showOpDetails)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: showOpDetails ? 'var(--navy)' : '#f0f4f8',
+                color: showOpDetails ? 'white' : 'var(--navy)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span>🔧 Operative Details {(form.position || form.implants.length > 0 || form.reductionAids.length > 0) ? `(${[form.position ? 1 : 0, form.implants.length, form.reductionAids.length].reduce((a,b) => a+b, 0)} selected)` : '(optional)'}</span>
+              <span style={{ fontSize: 18 }}>{showOpDetails ? '▲' : '▼'}</span>
+            </button>
           </div>
 
-          <div className="form-group">
-            <label>Implants Used</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 150, overflowY: 'auto' }}>
-              {implantTypes.slice(0, 20).map(imp => (
-                <button
-                  type="button"
-                  key={imp}
-                  className={`category-pill ${form.implants.includes(imp) ? 'active' : ''}`}
-                  onClick={() => toggleArrayItem('implants', imp)}
-                  style={{ fontSize: 12 }}
-                >
-                  {imp}
-                </button>
-              ))}
-            </div>
-          </div>
+          {showOpDetails && (
+            <>
+              <div className="form-group">
+                <label>Patient Position</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 150, overflowY: 'auto' }}>
+                  {(positions || []).map(pos => (
+                    <button
+                      type="button"
+                      key={pos}
+                      className={`category-pill ${form.position === pos ? 'active' : ''}`}
+                      onClick={() => setForm(f => ({...f, position: f.position === pos ? '' : pos}))}
+                    >
+                      {pos}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div className="form-group">
-            <label>Reduction Aids / Equipment</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 150, overflowY: 'auto' }}>
-              {reductionAids.slice(0, 15).map(aid => (
-                <button
-                  type="button"
-                  key={aid}
-                  className={`category-pill ${form.reductionAids.includes(aid) ? 'active' : ''}`}
-                  onClick={() => toggleArrayItem('reductionAids', aid)}
-                  style={{ fontSize: 12 }}
-                >
-                  {aid}
-                </button>
-              ))}
-            </div>
-          </div>
+              <div className="form-group">
+                <label>Implants Used</label>
+                <input
+                  type="text"
+                  placeholder="🔍 Filter implants..."
+                  value={implantSearch}
+                  onChange={e => setImplantSearch(e.target.value)}
+                  style={{ marginBottom: 6, fontSize: 13, padding: '6px 10px' }}
+                />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 180, overflowY: 'auto' }}>
+                  {filteredImplants.map(imp => (
+                    <button
+                      type="button"
+                      key={imp}
+                      className={`category-pill ${form.implants.includes(imp) ? 'active' : ''}`}
+                      onClick={() => toggleArrayItem('implants', imp)}
+                      style={{ fontSize: 12 }}
+                    >
+                      {imp}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="Custom implant (e.g. 3.5mm locking plate)..."
+                    value={form.implantCustom}
+                    onChange={e => setForm(f => ({...f, implantCustom: e.target.value}))}
+                    style={{ flex: 1, fontSize: 13, padding: '6px 10px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (form.implantCustom.trim()) {
+                        setForm(f => ({...f, implants: [...f.implants, f.implantCustom.trim()], implantCustom: ''}))
+                      }
+                    }}
+                    style={{ padding: '6px 12px', background: 'var(--amber)', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
+                  >
+                    + Add
+                  </button>
+                </div>
+                {form.implants.length > 0 && (
+                  <div style={{ marginTop: 8, fontSize: 13, color: '#666' }}>
+                    Selected: {form.implants.join(', ')}
+                  </div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label>Reduction Aids / Equipment</label>
+                <input
+                  type="text"
+                  placeholder="🔍 Filter reduction aids..."
+                  value={reductionSearch}
+                  onChange={e => setReductionSearch(e.target.value)}
+                  style={{ marginBottom: 6, fontSize: 13, padding: '6px 10px' }}
+                />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 180, overflowY: 'auto' }}>
+                  {filteredReductionAids.map(aid => (
+                    <button
+                      type="button"
+                      key={aid}
+                      className={`category-pill ${form.reductionAids.includes(aid) ? 'active' : ''}`}
+                      onClick={() => toggleArrayItem('reductionAids', aid)}
+                      style={{ fontSize: 12 }}
+                    >
+                      {aid}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="Custom equipment..."
+                    value={form.reductionAidCustom}
+                    onChange={e => setForm(f => ({...f, reductionAidCustom: e.target.value}))}
+                    style={{ flex: 1, fontSize: 13, padding: '6px 10px' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (form.reductionAidCustom.trim()) {
+                        setForm(f => ({...f, reductionAids: [...f.reductionAids, f.reductionAidCustom.trim()], reductionAidCustom: ''}))
+                      }
+                    }}
+                    style={{ padding: '6px 12px', background: 'var(--amber)', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
+                  >
+                    + Add
+                  </button>
+                </div>
+                {form.reductionAids.length > 0 && (
+                  <div style={{ marginTop: 8, fontSize: 13, color: '#666' }}>
+                    Selected: {form.reductionAids.join(', ')}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           <div className="form-group">
             <label>Case Notes</label>

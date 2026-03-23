@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import MediaUploader from './MediaUploader'
-import { CPT_CODES, REDUCTION_AIDS, IMPLANT_TYPES, APPROACHES, DEFAULT_ATTENDINGS } from '../data/cptCodes'
+import { CPT_CODES, REDUCTION_AIDS, IMPLANT_TYPES, APPROACHES, DEFAULT_ATTENDINGS, PATIENT_POSITIONS } from '../data/cptCodes'
 
 export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCase }) {
   const [c, setC] = useState(caseData)
@@ -261,14 +261,16 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
 
           <div className="form-group">
             <label style={labelStyle}>Patient Position</label>
-            <input type="text" placeholder="e.g., Supine on fracture table" value={editForm.position}
-              onChange={e => setEditForm(f => ({ ...f, position: e.target.value }))} style={inputStyle} />
+            <select value={editForm.position} onChange={e => setEditForm(f => ({ ...f, position: e.target.value }))} style={inputStyle}>
+              <option value="">Select position...</option>
+              {PATIENT_POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
           </div>
 
           <div className="form-group">
             <label style={labelStyle}>Implants Used</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 150, overflowY: 'auto' }}>
-              {IMPLANT_TYPES.slice(0, 20).map(imp => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 180, overflowY: 'auto' }}>
+              {IMPLANT_TYPES.map(imp => (
                 <button type="button" key={imp}
                   className={`category-pill ${editForm.implants.includes(imp) ? 'active' : ''}`}
                   onClick={() => toggleArrayItem('implants', imp)}
@@ -276,12 +278,15 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
                 >{imp}</button>
               ))}
             </div>
+            {editForm.implants.length > 0 && (
+              <div style={{ marginTop: 6, fontSize: 13, color: '#666' }}>Selected: {editForm.implants.join(', ')}</div>
+            )}
           </div>
 
           <div className="form-group">
             <label style={labelStyle}>Reduction Aids / Equipment</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 150, overflowY: 'auto' }}>
-              {REDUCTION_AIDS.slice(0, 15).map(aid => (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 180, overflowY: 'auto' }}>
+              {REDUCTION_AIDS.map(aid => (
                 <button type="button" key={aid}
                   className={`category-pill ${editForm.reductionAids.includes(aid) ? 'active' : ''}`}
                   onClick={() => toggleArrayItem('reductionAids', aid)}
@@ -289,6 +294,9 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
                 >{aid}</button>
               ))}
             </div>
+            {editForm.reductionAids.length > 0 && (
+              <div style={{ marginTop: 6, fontSize: 13, color: '#666' }}>Selected: {editForm.reductionAids.join(', ')}</div>
+            )}
           </div>
 
           <div className="form-group">
