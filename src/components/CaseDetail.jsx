@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import XRayUploader from './XRayUploader'
+import MediaUploader from './MediaUploader'
 import { CPT_CODES, REDUCTION_AIDS, IMPLANT_TYPES, APPROACHES, DEFAULT_ATTENDINGS } from '../data/cptCodes'
 
 export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCase }) {
   const [c, setC] = useState(caseData)
-  const [xrayImages, setXrayImages] = useState(c.xrayImages || [])
+  const [xrayImages, setXrayImages] = useState(c.xrayImages || c.mediaItems || [])
   const [shareStatus, setShareStatus] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState(null)
@@ -18,9 +18,13 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
     if (onUpdateCase) {
       const updated = {
         ...c,
-        xrayImages: images.map(img => ({
+        xrayImages: images.filter(m => m.type !== 'video').map(img => ({
           id: img.id, url: img.url, viewType: img.viewType,
-          caption: img.caption, uploadedAt: img.uploadedAt,
+          caption: img.caption, uploadedAt: img.uploadedAt, category: img.category,
+        })),
+        mediaItems: images.map(m => ({
+          id: m.id, url: m.url, type: m.type || 'image', viewType: m.viewType,
+          caption: m.caption, uploadedAt: m.uploadedAt, category: m.category,
         }))
       }
       setC(updated)
@@ -45,7 +49,14 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
     if (c.reductionAids?.length) lines.push(`🛠️ Reduction Aids: ${c.reductionAids.join(', ')}`)
     if (c.notes) lines.push(``, `📝 Notes:`, c.notes)
     if (c.tips) lines.push(``, `💡 Tip:`, c.tips)
-    if (xrayImages.length > 0) lines.push(``, `🩻 ${xrayImages.length} X-ray image${xrayImages.length > 1 ? 's' : ''} attached`)
+    if (xrayImages.length > 0) {
+      const imgCount = xrayImages.filter(m => m.type !== 'video').length
+      const vidCount = xrayImages.filter(m => m.type === 'video').length
+      const parts = []
+      if (imgCount > 0) parts.push(`${imgCount} image${imgCount > 1 ? 's' : ''}`)
+      if (vidCount > 0) parts.push(`${vidCount} video${vidCount > 1 ? 's' : ''}`)
+      lines.push(``, `🩻 ${parts.join(' + ')} attached`)
+    }
     lines.push(``, `---`, `Shared via OrthoLog`)
     return lines.join('\n')
   }
@@ -375,12 +386,12 @@ export default function CaseDetail({ caseData, onBack, onUpdateCase, onDeleteCas
       )}
 
       <div className="card">
-        <XRayUploader caseId={c.id} existingImages={xrayImages} onImagesChange={handleXrayChange} />
+        <MediaUploader caseId={c.id} existingImages={xrayImages} onImagesChange={handleXrayChange} />
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
         <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={handleShare}>
-          {shareStatus === 'copied' ? '✅ Copied!' : shareStatus === 'shared' ? '✅ Shared!' : xrayImages.length > 0 ? `📤 Share + ${xrayImages.length} 🩻` : '📤 Share Case'}
+          {shareStatus === 'copied' ? '✅ Copied!' : shareStatus === 'shared' ? '✅ Shared!' : xrayImages.length > 0 ? `📤 Share + ${xrayImages.length} 📎` : '📤 Share Case'}
         </button>
         <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={startEdit}>
           ✏️ Edit
