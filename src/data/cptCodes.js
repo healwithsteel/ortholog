@@ -26,6 +26,11 @@ export const CPT_CODES = [
   { code: '27248', desc: 'ORIF greater trochanter fracture', category: 'trauma', body: 'hip' },
   { code: '27254', desc: 'ORIF acetabular fracture(s)', category: 'trauma', body: 'hip' },
   { code: '27269', desc: 'ORIF of hip socket (acetabular) fracture(s) with internal fixation', category: 'trauma', body: 'hip' },
+  { code: '27266', desc: 'Closed treatment of prosthetic hip dislocation, requiring anesthesia', category: ['trauma', 'recon'], body: 'hip' },
+  { code: '27265', desc: 'Closed treatment of hip dislocation, without anesthesia', category: 'trauma', body: 'hip' },
+  { code: '27250', desc: 'Closed treatment of hip dislocation, traumatic; without anesthesia', category: 'trauma', body: 'hip' },
+  { code: '27252', desc: 'Closed treatment of hip dislocation, traumatic; requiring anesthesia', category: 'trauma', body: 'hip' },
+  { code: '27253', desc: 'Open treatment of hip dislocation, traumatic', category: 'trauma', body: 'hip' },
   
   // === TRAUMA — Femur Shaft ===
   { code: '27500', desc: 'Closed treatment femoral shaft fracture without manipulation', category: 'trauma', body: 'femur' },
