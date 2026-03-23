@@ -99,6 +99,14 @@ export const CPT_CODES = [
   { code: '27487', desc: 'Revision of total knee arthroplasty (both components)', category: 'recon', body: 'knee' },
   { code: '27446', desc: 'Unicompartmental knee arthroplasty', category: 'recon', body: 'knee' },
   
+  // === RECONSTRUCTION — Shoulder ===
+  { code: '23472', desc: 'Reverse total shoulder arthroplasty', category: 'recon', body: 'shoulder' },
+  { code: '23470', desc: 'Total shoulder arthroplasty (anatomic)', category: 'recon', body: 'shoulder' },
+  { code: '23473', desc: 'Revision of total shoulder arthroplasty (humeral or glenoid component)', category: 'recon', body: 'shoulder' },
+  { code: '23474', desc: 'Revision of total shoulder arthroplasty (humeral and glenoid components)', category: 'recon', body: 'shoulder' },
+  { code: '23471', desc: 'Hemiarthroplasty, shoulder', category: ['recon', 'trauma'], body: 'shoulder' },
+  { code: '23440', desc: 'Resection arthroplasty, glenohumeral joint', category: 'recon', body: 'shoulder' },
+  
   // === SPORTS ===
   { code: '29881', desc: 'Arthroscopy, knee, surgical; with meniscectomy', category: 'sports', body: 'knee' },
   { code: '29882', desc: 'Arthroscopy, knee; with meniscus repair', category: 'sports', body: 'knee' },
@@ -224,12 +232,33 @@ export const IMPLANT_TYPES = [
   'THA components (uncemented)',
   'Hemiarthroplasty (unipolar)',
   'Hemiarthroplasty (bipolar)',
+  'Reverse TSA components (glenosphere, humeral stem)',
+  'Anatomic TSA components (humeral head, glenoid)',
+  'Shoulder hemiarthroplasty components',
   'TKA components',
   'Bone graft — autograft',
   'Bone graft — allograft',
   'Bone graft substitute',
   'PMMA cement',
   'Suture button (TightRope etc)',
+]
+
+// Patient positions
+export const PATIENT_POSITIONS = [
+  'Supine',
+  'Supine on fracture table',
+  'Supine on radiolucent table',
+  'Beach chair',
+  'Lateral decubitus',
+  'Lateral decubitus (left)',
+  'Lateral decubitus (right)',
+  'Prone',
+  'Prone on Wilson frame',
+  'Prone on Jackson table',
+  'Semi-lateral',
+  'Frog-leg lateral',
+  'Hemilithotomy',
+  'Seated',
 ]
 
 // Approach types
@@ -240,6 +269,8 @@ export const APPROACHES = [
   'Direct lateral (Hardinge)',
   'Posterior (Kocher-Langenbeck)',
   'Posterolateral',
+  'Deltopectoral (shoulder)',
+  'Superolateral (shoulder)',
   'Medial',
   'Lateral',
   'Ilioinguinal',

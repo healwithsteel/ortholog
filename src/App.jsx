@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { SAMPLE_CASES, SAMPLE_TIPS } from './data/sampleData'
-import { CPT_CODES, CPT_CATEGORIES, REDUCTION_AIDS, IMPLANT_TYPES, APPROACHES, DEFAULT_ATTENDINGS } from './data/cptCodes'
+import { CPT_CODES, CPT_CATEGORIES, REDUCTION_AIDS, IMPLANT_TYPES, APPROACHES, DEFAULT_ATTENDINGS, PATIENT_POSITIONS } from './data/cptCodes'
 import { loadCases, saveCases, loadTips, saveTips, loadUser, saveUser, exportAllData } from './lib/storage'
 import { useAuth } from './lib/auth'
 import { isSupabaseConfigured } from './lib/supabase'
@@ -327,6 +327,7 @@ export default function App() {
           implantTypes={IMPLANT_TYPES}
           approaches={APPROACHES}
           attendings={DEFAULT_ATTENDINGS}
+          positions={PATIENT_POSITIONS}
         />
       )}
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function NewCaseForm({ onSubmit, onClose, cptCodes, reductionAids, implantTypes, approaches, attendings }) {
+export default function NewCaseForm({ onSubmit, onClose, cptCodes, reductionAids, implantTypes, approaches, attendings, positions }) {
   const [form, setForm] = useState({
     date: new Date().toISOString().split('T')[0],
     cptCode: '',
@@ -129,12 +129,18 @@ export default function NewCaseForm({ onSubmit, onClose, cptCodes, reductionAids
 
           <div className="form-group">
             <label>Patient Position</label>
-            <input 
-              type="text" 
-              placeholder="e.g., Supine on fracture table"
-              value={form.position}
-              onChange={e => setForm(f => ({...f, position: e.target.value}))}
-            />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 150, overflowY: 'auto' }}>
+              {(positions || []).map(pos => (
+                <button
+                  type="button"
+                  key={pos}
+                  className={`category-pill ${form.position === pos ? 'active' : ''}`}
+                  onClick={() => setForm(f => ({...f, position: f.position === pos ? '' : pos}))}
+                >
+                  {pos}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="form-group">
