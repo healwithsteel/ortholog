@@ -79,7 +79,14 @@ export const CPT_CODES = [
   { code: '27227', desc: 'ORIF acetabular fracture(s) involving anterior or posterior column', category: 'trauma', body: 'pelvis' },
   { code: '27228', desc: 'ORIF acetabular fracture(s) involving both columns', category: 'trauma', body: 'pelvis' },
   
-  // === TRAUMA — Humerus ===
+  // === TRAUMA — Proximal Humerus ===
+  { code: '23600', desc: 'Closed treatment proximal humerus fracture without manipulation', category: ['trauma', 'upper'], body: 'shoulder' },
+  { code: '23605', desc: 'Closed treatment proximal humerus fracture with manipulation', category: ['trauma', 'upper'], body: 'shoulder' },
+  { code: '23615', desc: 'ORIF proximal humerus fracture with internal fixation', category: ['trauma', 'upper'], body: 'shoulder' },
+  { code: '23616', desc: 'ORIF proximal humerus fracture with prosthetic replacement (hemiarthroplasty)', category: ['trauma', 'upper'], body: 'shoulder' },
+  { code: '23630', desc: 'ORIF greater tuberosity fracture', category: ['trauma', 'upper'], body: 'shoulder' },
+
+  // === TRAUMA — Humerus (Shaft & Distal) ===
   { code: '24515', desc: 'ORIF humeral shaft fracture with plate/screws', category: ['trauma', 'upper'], body: 'humerus' },
   { code: '24516', desc: 'ORIF humeral shaft fracture with IM device', category: ['trauma', 'upper'], body: 'humerus' },
   { code: '24545', desc: 'ORIF humeral epicondyle fracture', category: ['trauma', 'upper'], body: 'humerus' },
@@ -219,6 +226,7 @@ export const REDUCTION_AIDS = [
 // Implant types
 export const IMPLANT_TYPES = [
   'Plate — LCP (locking compression)',
+  'Plate — Proximal humerus locking plate (PHILOS etc)',
   'Plate — LC-DCP',
   'Plate — Reconstruction plate',
   'Plate — Precontoured (anatomic/olecranon)',
