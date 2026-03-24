@@ -42,12 +42,15 @@ export const CPT_CODES = [
   { code: '27513', desc: 'ORIF femoral supracondylar or transcondylar fracture with intercondylar extension', category: 'trauma', body: 'femur' },
   { code: '27514', desc: 'ORIF femoral condyle fracture', category: 'trauma', body: 'femur' },
   
+  // === TRAUMA — Patella ===
+  { code: '27520', desc: 'Closed treatment patellar fracture without manipulation', category: 'trauma', body: 'knee' },
+  { code: '27524', desc: 'ORIF patellar fracture with internal fixation and/or partial or complete patellectomy', category: 'trauma', body: 'knee' },
+
   // === TRAUMA — Tibia/Fibula ===
-  { code: '27520', desc: 'Closed treatment tibial plateau fracture without manipulation', category: 'trauma', body: 'tibia' },
-  { code: '27524', desc: 'ORIF tibial plateau fracture', category: 'trauma', body: 'tibia' },
-  { code: '27532', desc: 'Closed treatment tibial shaft fracture with manipulation', category: 'trauma', body: 'tibia' },
-  { code: '27535', desc: 'ORIF tibial shaft fracture', category: 'trauma', body: 'tibia' },
-  { code: '27536', desc: 'ORIF tibial shaft fracture with comminution', category: 'trauma', body: 'tibia' },
+  { code: '27530', desc: 'Closed treatment tibial plateau fracture without manipulation', category: 'trauma', body: 'tibia' },
+  { code: '27532', desc: 'Closed treatment tibial plateau fracture with skeletal traction', category: 'trauma', body: 'tibia' },
+  { code: '27535', desc: 'ORIF tibial plateau fracture, unicondylar', category: 'trauma', body: 'tibia' },
+  { code: '27536', desc: 'ORIF tibial plateau fracture, bicondylar', category: 'trauma', body: 'tibia' },
   { code: '27540', desc: 'ORIF proximal fibula/shaft fracture', category: 'trauma', body: 'tibia' },
   { code: '27758', desc: 'ORIF tibial shaft fracture with plate/screws', category: 'trauma', body: 'tibia' },
   { code: '27759', desc: 'ORIF tibial shaft fracture with intramedullary implant', category: 'trauma', body: 'tibia' },
@@ -84,7 +87,14 @@ export const CPT_CODES = [
   { code: '24575', desc: 'ORIF humeral epicondyle fracture', category: ['trauma', 'upper'], body: 'humerus' },
   { code: '24579', desc: 'ORIF supracondylar/transcondylar humerus fracture with intercondylar extension', category: ['trauma', 'upper'], body: 'humerus' },
   { code: '24586', desc: 'ORIF periarticular fracture distal humerus', category: ['trauma', 'upper'], body: 'humerus' },
-  
+
+  // === TRAUMA — Olecranon / Proximal Ulna ===
+  { code: '24670', desc: 'Closed treatment olecranon fracture without manipulation', category: ['trauma', 'upper'], body: 'elbow' },
+  { code: '24675', desc: 'Closed treatment olecranon fracture with manipulation', category: ['trauma', 'upper'], body: 'elbow' },
+  { code: '24685', desc: 'ORIF olecranon fracture', category: ['trauma', 'upper'], body: 'elbow' },
+  { code: '24665', desc: 'ORIF radial head or neck fracture', category: ['trauma', 'upper'], body: 'elbow' },
+  { code: '24666', desc: 'ORIF radial head or neck fracture with prosthetic replacement', category: ['trauma', 'upper'], body: 'elbow' },
+
   // === TRAUMA — Forearm ===
   { code: '25574', desc: 'ORIF distal radius fracture', category: ['trauma', 'hand'], body: 'radius' },
   { code: '25607', desc: 'ORIF distal radius extraarticular fracture', category: ['trauma', 'hand'], body: 'radius' },
@@ -280,6 +290,7 @@ export const APPROACHES = [
   'Direct anterior (hip)',
   'Direct lateral (Hardinge)',
   'Posterior (Kocher-Langenbeck)',
+  'Posterior (direct, elbow)',
   'Posterolateral',
   'Deltopectoral (shoulder)',
   'Superolateral (shoulder)',
