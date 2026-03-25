@@ -169,7 +169,7 @@ export const CODING_SCENARIOS = [
     title: 'Hip Fracture — Basic CMN',
     scenario: 'An 82-year-old female presents to the ED after a ground-level fall. X-rays show a displaced intertrochanteric femur fracture (AO 31-A2). Taken to OR for cephalomedullary nail fixation. Jon Kletter PA-C assists. Straightforward case, 55 minutes.',
     correctCodes: [
-      { code: '27245', desc: 'ORIF intertrochanteric fracture with plate/screw implant', primary: true },
+      { code: '27245', desc: 'ORIF intertrochanteric fracture with intramedullary implant (CMN)', primary: true },
     ],
     correctModifiers: ['AS'],
     correctDiagnoses: ['S72.141A — Displaced intertrochanteric fracture of right femur, initial encounter'],
@@ -286,7 +286,7 @@ export const CODING_SCENARIOS = [
 
 **Revenue impact:** Without -78, the revision gets denied as part of the original global period. The surgeon does the work and gets $0. With -78, it's separately reimbursed.`,
     distractors: [
-      { code: '23615', desc: 'ORIF proximal humerus fracture (without -78)', why: 'Without -78, this gets denied as part of the 90-day global period' },
+      { code: '24515', desc: 'ORIF humeral shaft fracture', why: 'Wrong anatomic location — this is for humeral shaft, not proximal humerus' },
       { code: '23616', desc: 'ORIF proximal humerus fracture with tuberosity', why: 'Different procedure — this includes tuberosity repair' },
     ],
   },
@@ -361,8 +361,7 @@ export const CODING_SCENARIOS = [
     title: 'Same-Day Bilateral Ankle Fractures',
     scenario: 'A 55-year-old male falls from a ladder, landing on both feet. Bilateral displaced lateral malleolus fractures (Weber C pattern). Both ankles ORIF with lateral plates in the same anesthesia session. Right side first, then left. PA-C assists. 80 minutes total.',
     correctCodes: [
-      { code: '27792', desc: 'ORIF distal fibula fracture', primary: true },
-      { code: '27792', desc: 'ORIF distal fibula fracture (contralateral)', primary: false },
+      { code: '27792', desc: 'ORIF distal fibula fracture (bilateral with -50 modifier)', primary: true },
     ],
     correctModifiers: ['50', 'AS'],
     correctDiagnoses: [
